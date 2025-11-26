@@ -64,11 +64,11 @@
     Datos de ejemplo. El backend puede exponer /api/parks que devuelva objetos JSON con {id,nombre,lat,lng,localidad,area_m2,descripcion}.
   </footer>
 
-  <!-- Leaflet JS -->
+  
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // Datos de ejemplo — en producción: fetch('/api/parks')
+    
     const sampleParks = [
       {id:1,nombre:'Parque Simón Bolívar',lat:4.655, lng:-74.093,localidad:'Teusaquillo',area_m2:114000,descripcion:'El principal parque de la ciudad, con lagos y zonas verdes.'},
       {id:2,nombre:'Parque El Virrey',lat:4.678, lng:-74.050,localidad:'Chapinero',area_m2:20000,descripcion:'Abarrotado de corredores y áreas para perros.'},
@@ -77,11 +77,11 @@
       {id:5,nombre:'Parque El Tunal',lat:4.598, lng:-74.136,localidad:'Tunjuelito',area_m2:60000,descripcion:'Gran parque recreativo con canchas deportivas.'}
     ];
 
-    // Inicializar mapa
+    
     const map = L.map('map', {zoomControl:false}).setView([4.6482837,-74.2478931], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
 
-    // Icono juguetón
+   
     const parkIcon = L.divIcon({
       className: '',
       html: `
@@ -109,7 +109,7 @@
     function renderList(parks, center=null){
       const container = document.getElementById('parksContainer');
       container.innerHTML = '';
-      // Ordenar por distancia si center dado
+ 
       if(center){
         parks = parks.map(p=>({...p,dist:distanceMeters(center,[p.lat,p.lng])})).sort((a,b)=>a.dist-b.dist);
       }
@@ -140,11 +140,11 @@
       return R*c;
     }
 
-    // Inicial render
+   
     addParksToMap(sampleParks);
     renderList(sampleParks);
 
-    // Buscar
+    
     document.getElementById('searchBtn').addEventListener('click',()=>{
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       if(!q){renderList(sampleParks);addParksToMap(sampleParks);return}
@@ -154,28 +154,28 @@
       if(filtered.length) map.fitBounds(filtered.map(p=>[p.lat,p.lng]),{padding:[80,80]});
     });
 
-    // Mostrar todos
+   
     document.getElementById('listAllBtn').addEventListener('click',()=>{addParksToMap(sampleParks);renderList(sampleParks);map.fitBounds(sampleParks.map(p=>[p.lat,p.lng]),{padding:[60,60]})});
 
-    // Encontrar cercano
+    
     document.getElementById('locateBtn').addEventListener('click',()=>{
       if(!navigator.geolocation){alert('Tu navegador no soporta geolocalización.')}
       navigator.geolocation.getCurrentPosition(pos=>{
         const coords = [pos.coords.latitude,pos.coords.longitude];
-        // marcador de usuario
+       
         L.circleMarker(coords,{radius:8,fillColor:'#fff',color:varColor('--accent'),weight:4}).addTo(map).bindPopup('Tú estás aquí').openPopup();
         map.setView(coords,13);
-        // ordenar lista por distancia
+        
         renderList(sampleParks,coords);
       },err=>{alert('No se pudo obtener la ubicación: '+err.message)},{enableHighAccuracy:false});
     });
 
     function varColor(name){return getComputedStyle(document.documentElement).getPropertyValue(name)||'#00a86b'}
 
-    // Helper: permitir enviar click desde HTML (secure in this simple example)
+  
     window.zoomToPark = zoomToPark;
 
-    // En producción: función para cargar desde API
+    
     async function loadParksFromAPI(){
       try{
         const res = await fetch('/api/parks');
@@ -186,64 +186,9 @@
       }catch(e){console.warn('No se pudo cargar desde API — usando datos locales',e)}
     }
 
-    // Puedes descomentar para probar carga remota
-    // loadParksFromAPI();
+
   </script>
 
-  <!-- Snippets de backend (para guiar al desarrollador) -->
-  <!--
-    FastAPI (python) - archivo api.py
-
-    from fastapi import FastAPI
-    from pydantic import BaseModel
-    from typing import List
-
-    app = FastAPI()
-
-    class Park(BaseModel):
-      id: int
-      nombre: str
-      lat: float
-      lng: float
-      localidad: str
-      area_m2: int
-      descripcion: str = ''
-
-    # Ejemplo: en producción conecta a Postgres/SQLite
-    PARKS = [
-      {"id":1,"nombre":"Parque Simón Bolívar","lat":4.655,"lng":-74.093,"localidad":"Teusaquillo","area_m2":114000},
-      # ...
-    ]
-
-    @app.get('/api/parks', response_model=List[Park])
-    async def get_parks():
-      return PARKS
-
-    # correr: uvicorn api:app --reload --host 0.0.0.0 --port 8000
-
-    -----------------------------------------------------------
-    Flask (python) - archivo app.py
-
-    from flask import Flask, jsonify
-    app = Flask(__name__)
-
-    PARKS = [
-      {"id":1,"nombre":"Parque Simón Bolívar","lat":4.655,"lng":-74.093,"localidad":"Teusaquillo","area_m2":114000},
-      # ...
-    ]
-
-    @app.route('/api/parks')
-    def parks():
-      return jsonify(PARKS)
-
-    if __name__=='__main__':
-      app.run(host='0.0.0.0',port=8000,debug=True)
-
-    -----------------------------------------------------------------
-    Recomendaciones:
-    - En producción usa una base de datos (Postgres) con índices geoespaciales (PostGIS) o construye un servicio que haga consultas por proximidad.
-    - Añade paginación y caching para listados grandes.
-    - Protege las rutas de administración con autenticación (JWT o sesión).
-  -->
+ 
 </body>
 </html>
