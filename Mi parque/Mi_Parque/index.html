@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Miparque · Parques de Bogotá</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="" crossorigin=""/>
+  <link rel="stylesheet" href="CSS/CSS" />
+  
+</head>
+<body>
+    <div id="loading-screen">
+  <div class="spinner"></div>
+  <p>Cargando parques…</p>
+</div>
+
+  <header>
+    <div class="brand">
+      <div class="logo bouncy" aria-hidden="true">
+        <!-- ícono simple de árbol + columpio -->
+        <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="12" fill="white"/>
+          <g transform="translate(6 6)">
+            <circle cx="22" cy="14" r="10" fill="#00b87a" />
+            <rect x="18" y="22" width="8" height="18" rx="3" fill="#7b4bff" opacity="0.9"/>
+            <rect x="22" y="30" width="14" height="4" rx="2" fill="#ffd2e0"/>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <h1>Miparque</h1>
+        <p class="tag">Encuentra parques en Bogotá — elige el más cercano</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="locateBtn">Encontrar cercano</button>
+      <button class="btn ghost" id="listAllBtn">Mostrar todos</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div id="map" role="application" aria-label="Mapa de parques"></div>
+    </section>
+
+    <aside>
+      <div class="search">
+        <input id="searchInput" placeholder="Buscar por nombre, localidad o barrio" aria-label="Buscar parques" />
+        <button class="btn" id="searchBtn">Buscar</button>
+      </div>
+
+      <div class="park-list" id="parksContainer" aria-live="polite"></div>
+
+      <div style="margin-top:16px;font-size:12px;color:var(--muted)">
+        <strong>Consejo:</strong> usa el botón "Encontrar cercano" para que el mapa calibre desde tu ubicación.
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Datos de ejemplo. El backend puede exponer /api/parks que devuelva objetos JSON con {id,nombre,lat,lng,localidad,area_m2,descripcion}.
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Datos de ejemplo — en producción: fetch('/api/parks')
+    const sampleParks = [
+      {id:1,nombre:'Parque Simón Bolívar',lat:4.655, lng:-74.093,localidad:'Teusaquillo',area_m2:114000,descripcion:'El principal parque de la ciudad, con lagos y zonas verdes.'},
+      {id:2,nombre:'Parque El Virrey',lat:4.678, lng:-74.050,localidad:'Chapinero',area_m2:20000,descripcion:'Abarrotado de corredores y áreas para perros.'},
+      {id:3,nombre:'Parque de los Novios',lat:4.652, lng:-74.065,localidad:'Barrios Unidos',area_m2:48000,descripcion:'Hermosas zonas para picnic y eventos.'},
+      {id:4,nombre:'Parque Nacional Enrique Olaya Herrera',lat:4.636, lng:-74.073,localidad:'Santa Fe',area_m2:30000,descripcion:'Parque tradicional con senderos y esculturas.'},
+      {id:5,nombre:'Parque El Tunal',lat:4.598, lng:-74.136,localidad:'Tunjuelito',area_m2:60000,descripcion:'Gran parque recreativo con canchas deportivas.'}
+    ];
+
+    // Inicializar mapa
+    const map = L.map('map', {zoomControl:false}).setView([4.6482837,-74.2478931], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+
+    // Icono juguetón
+    const parkIcon = L.divIcon({
+      className: '',
+      html: `
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(180deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,0.14)">🌳</div>
+        </div>
+      `,
+      iconSize:[36,36],
+      iconAnchor:[18,36]
+    });
+
+    let markers = [];
+
+    function addParksToMap(parks){
+      // limpiar
+      markers.forEach(m=>map.removeLayer(m));
+      markers = [];
+
+      parks.forEach(p=>{
+        const m = L.marker([p.lat,p.lng],{icon:parkIcon}).addTo(map).bindPopup(`<strong>${p.nombre}</strong><br>${p.localidad}<br>${p.descripcion}`);
+        markers.push(m);
+      });
+    }
+
+    function renderList(parks, center=null){
+      const container = document.getElementById('parksContainer');
+      container.innerHTML = '';
+      // Ordenar por distancia si center dado
+      if(center){
+        parks = parks.map(p=>({...p,dist:distanceMeters(center,[p.lat,p.lng])})).sort((a,b)=>a.dist-b.dist);
+      }
+      parks.forEach(p=>{
+        const el = document.createElement('div');
+        el.className = 'park';
+        el.innerHTML = `
+          <div class="thumb">${p.nombre.split(' ').slice(0,1)[0].slice(0,2).toUpperCase()}</div>
+          <div>
+            <h3>${p.nombre}</h3>
+            <p>${p.localidad} • ${Math.round(p.area_m2/1000)} km²</p>
+          </div>
+          <div class="meta">${center?Math.round((p.dist||0))+' m':''}<div style="margin-top:6px"><button class="btn ghost" onclick='zoomToPark(${p.lat},${p.lng})'>Ver</button></div></div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function zoomToPark(lat,lng){map.setView([lat,lng],15,{animate:true});}
+
+    function distanceMeters([lat1,lng1],[lat2,lng2]){
+      const R = 6371000; // m
+      const toRad = d=>d*Math.PI/180;
+      const dLat = toRad(lat2-lat1);
+      const dLon = toRad(lng2-lng1);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
+      const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+      return R*c;
+    }
+
+    // Inicial render
+    addParksToMap(sampleParks);
+    renderList(sampleParks);
+
+    // Buscar
+    document.getElementById('searchBtn').addEventListener('click',()=>{
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      if(!q){renderList(sampleParks);addParksToMap(sampleParks);return}
+      const filtered = sampleParks.filter(p=>p.nombre.toLowerCase().includes(q)||p.localidad.toLowerCase().includes(q)|| (p.descripcion||'').toLowerCase().includes(q));
+      addParksToMap(filtered);
+      renderList(filtered);
+      if(filtered.length) map.fitBounds(filtered.map(p=>[p.lat,p.lng]),{padding:[80,80]});
+    });
+
+    // Mostrar todos
+    document.getElementById('listAllBtn').addEventListener('click',()=>{addParksToMap(sampleParks);renderList(sampleParks);map.fitBounds(sampleParks.map(p=>[p.lat,p.lng]),{padding:[60,60]})});
+
+    // Encontrar cercano
+    document.getElementById('locateBtn').addEventListener('click',()=>{
+      if(!navigator.geolocation){alert('Tu navegador no soporta geolocalización.')}
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const coords = [pos.coords.latitude,pos.coords.longitude];
+        // marcador de usuario
+        L.circleMarker(coords,{radius:8,fillColor:'#fff',color:varColor('--accent'),weight:4}).addTo(map).bindPopup('Tú estás aquí').openPopup();
+        map.setView(coords,13);
+        // ordenar lista por distancia
+        renderList(sampleParks,coords);
+      },err=>{alert('No se pudo obtener la ubicación: '+err.message)},{enableHighAccuracy:false});
+    });
+
+    function varColor(name){return getComputedStyle(document.documentElement).getPropertyValue(name)||'#00a86b'}
+
+    // Helper: permitir enviar click desde HTML (secure in this simple example)
+    window.zoomToPark = zoomToPark;
+
+    // En producción: función para cargar desde API
+    async function loadParksFromAPI(){
+      try{
+        const res = await fetch('/api/parks');
+        if(!res.ok) throw new Error('API response not ok');
+        const parks = await res.json();
+        addParksToMap(parks);
+        renderList(parks);
+      }catch(e){console.warn('No se pudo cargar desde API — usando datos locales',e)}
+    }
+
+    // Puedes descomentar para probar carga remota
+    // loadParksFromAPI();
+  </script>
+
+  <!-- Snippets de backend (para guiar al desarrollador) -->
+  <!--
+    FastAPI (python) - archivo api.py
+
+    from fastapi import FastAPI
+    from pydantic import BaseModel
+    from typing import List
+
+    app = FastAPI()
+
+    class Park(BaseModel):
+      id: int
+      nombre: str
+      lat: float
+      lng: float
+      localidad: str
+      area_m2: int
+      descripcion: str = ''
+
+    # Ejemplo: en producción conecta a Postgres/SQLite
+    PARKS = [
+      {"id":1,"nombre":"Parque Simón Bolívar","lat":4.655,"lng":-74.093,"localidad":"Teusaquillo","area_m2":114000},
+      # ...
+    ]
+
+    @app.get('/api/parks', response_model=List[Park])
+    async def get_parks():
+      return PARKS
+
+    # correr: uvicorn api:app --reload --host 0.0.0.0 --port 8000
+
+    -----------------------------------------------------------
+    Flask (python) - archivo app.py
+
+    from flask import Flask, jsonify
+    app = Flask(__name__)
+
+    PARKS = [
+      {"id":1,"nombre":"Parque Simón Bolívar","lat":4.655,"lng":-74.093,"localidad":"Teusaquillo","area_m2":114000},
+      # ...
+    ]
+
+    @app.route('/api/parks')
+    def parks():
+      return jsonify(PARKS)
+
+    if __name__=='__main__':
+      app.run(host='0.0.0.0',port=8000,debug=True)
+
+    -----------------------------------------------------------------
+    Recomendaciones:
+    - En producción usa una base de datos (Postgres) con índices geoespaciales (PostGIS) o construye un servicio que haga consultas por proximidad.
+    - Añade paginación y caching para listados grandes.
+    - Protege las rutas de administración con autenticación (JWT o sesión).
+  -->
+</body>
+</html>
