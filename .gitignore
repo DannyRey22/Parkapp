@@ -1,0 +1,39 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Caché de pip
+.pip-cache/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Archivos del sistema
+Thumbs.db
+.env
+
+# Carpeta de datos temporales
+*.csv
+*.xlsx
+*.xls
+
+# Archivos compilados
+dist/
+build/
+*.egg-info/
+.eggs/
