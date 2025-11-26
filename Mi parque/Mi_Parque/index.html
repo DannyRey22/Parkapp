@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Miparque · Parques de Bogotá</title>
 
-  <!-- Leaflet CSS -->
+  
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="" crossorigin=""/>
   <link rel="stylesheet" href="CSS/CSS" />
   
@@ -55,13 +55,13 @@
       <div class="park-list" id="parksContainer" aria-live="polite"></div>
 
       <div style="margin-top:16px;font-size:12px;color:var(--muted)">
-        <strong>Consejo:</strong> usa el botón "Encontrar cercano" para que el mapa calibre desde tu ubicación.
+        <strong>Aqui</strong> Se pone el boton para que calibre a la ubicación
       </div>
     </aside>
   </main>
 
   <footer>
-    Datos de ejemplo. El backend puede exponer /api/parks que devuelva objetos JSON con {id,nombre,lat,lng,localidad,area_m2,descripcion}.
+    JDC 2025.
   </footer>
 
   
@@ -96,7 +96,7 @@
     let markers = [];
 
     function addParksToMap(parks){
-      // limpiar
+      
       markers.forEach(m=>map.removeLayer(m));
       markers = [];
 
