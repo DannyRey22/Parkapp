@@ -33,6 +33,37 @@ body{
   animation-delay:1.8s;
 }
 
+.loading-icon {
+  width: 70px;
+  height: 70px;
+  animation: tree-wiggle 1.6s infinite ease-in-out;
+}
+
+@keyframes tree-wiggle {
+  0%,100% { transform: rotate(0deg); }
+  40% { transform: rotate(6deg); }
+  60% { transform: rotate(-6deg); }
+}
+
+.bike-loading {
+  width: 500px;
+  animation: bike-move 1.4s infinite linear;
+}
+
+@keyframes bike-move {
+  0% { transform: translateX(-12px); }
+  50% { transform: translateX(12px); }
+  100% { transform: translateX(-12px); }
+}
+
+.brand-logo{
+  width: 80px;
+  height: auto;
+
+}
+
+
+
 .spinner{
   width:56px;
   height:56px;
@@ -45,11 +76,99 @@ body{
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes fadeOut{to{opacity:0;visibility:hidden;}}
 
+/* ---------------- HEADER NUEVO ---------------- */
 
-header{padding:28px 18px;display:flex;align-items:center;gap:18px;justify-content:space-between}
-.brand{display:flex;gap:14px;align-items:center}
-.logo{width:68px;height:68px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,0,0,0.08)}
-.logo svg{filter:drop-shadow(0 6px 18px rgba(0,0,0,0.12))}
+/* ---------------- HEADER NUEVO CENTRADO ---------------- */
+
+.top-header{
+  position: relative;
+  background: linear-gradient(90deg, var(--accent), #00c27a);
+  padding: 40px 0 10px;
+  border-bottom: 4px solid #00965a;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.title-miparque {
+  font-family: 'Amatic SC', sans-serif;
+  font-size: 70px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.subtitle{
+  color: #eaffef;
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+
+
+
+.header-actions{
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.search-bar{
+  display:flex;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  overflow:hidden;
+}
+
+.search-bar input{
+  padding: 10px 12px;
+  border:none;
+  outline:none;
+  font-weight:600;
+}
+
+.search-btn{
+  background:var(--accent);
+  border:none;
+  padding:10px 13px;
+  font-size:16px;
+  cursor:pointer;
+  color:white;
+}
+
+.header-btn{
+  background:white;
+  color:var(--accent);
+  padding:10px 16px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  transition:0.2s;
+}
+
+.header-btn:hover{
+  transform:scale(1.06);
+}
+
+.header-btn.ghost{
+  background:transparent;
+  border:2px solid white;
+  color:white;
+}
+
+
+
+
+
 h1{font-size:20px;margin:0}
 p.tag{margin:0;font-size:12px;color:var(--muted)}
 
@@ -67,7 +186,7 @@ aside{position:sticky;top:22px;height:calc(100vh - 44px);padding:18px;background
 .search input{flex:1;padding:10px 12px;border-radius:10px;border:2px solid rgba(11,42,26,0.06);font-weight:600}
 
 
-/* Animación "aparecer" para parques */
+
 .park{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#fff, #fbfff9);padding:12px;border-radius:12px;border:1px solid rgba(11,42,26,0.04);opacity:0;transform:translateY(10px);animation:show 0.4s ease forwards}
 @keyframes show{to{opacity:1;transform:translateY(0)}}
 
@@ -78,12 +197,11 @@ aside{position:sticky;top:22px;height:calc(100vh - 44px);padding:18px;background
 .meta{text-align:right;font-size:12px;color:var(--muted);margin-left:auto}
 
 
-/* Icono animado del mapa */
+
 .park-icon-bounce{animation:jump 1.6s infinite ease-in-out}
 @keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
-/* Footer */
+
 footer{padding:20px;text-align:center;font-size:12px;color:var(--muted)}
 
-/* Responsive */
 @media(max-width:980px){main{grid-template-columns:1fr}aside{position:static;height:auto;margin-top:10px}#map{height:60vh}}

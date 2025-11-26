@@ -8,38 +8,43 @@
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="" crossorigin=""/>
   <link rel="stylesheet" href="CSS/estilos.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+
   
 </head>
 <body>
-    <div id="loading-screen">
-  <div class="spinner"></div>
-  <p>Cargando parques…</p>
+<div id="loading-screen">
+  <img src="IMAGENES/Logo_Carga1.png"
+       class="bike-loading"
+       alt="loading bike">
+  <h3>Cargando Tu parque más cercano…</h3>
 </div>
 
-  <header>
-    <div class="brand">
-      <div class="logo bouncy" aria-hidden="true">
-        <!-- ícono simple de árbol + columpio -->
-        <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="64" height="64" rx="12" fill="white"/>
-          <g transform="translate(6 6)">
-            <circle cx="22" cy="14" r="10" fill="#00b87a" />
-            <rect x="18" y="22" width="8" height="18" rx="3" fill="#7b4bff" opacity="0.9"/>
-            <rect x="22" y="30" width="14" height="4" rx="2" fill="#ffd2e0"/>
-          </g>
-        </svg>
-      </div>
-      <div>
-        <h1>Miparque</h1>
-        <p class="tag">Encuentra parques en Bogotá — elige el más cercano</p>
-      </div>
+<header class="top-header">
+
+  <!-- Centro del header: Logo grande + títulos -->
+  
+    <div class="header-titles">
+      <h1 class="title-miparque">Mi Parque</h1>
+      <p class="subtitle">Encuentra parques cerca de ti</p>
+    </div>
+  </div>
+
+  <!-- Controles abajo a la derecha -->
+  <div class="header-actions">
+
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="Buscar parque, localidad o barrio…">
+      <button id="searchBtn" class="search-btn">🔍</button>
     </div>
 
-    <div class="controls">
-      <button class="btn" id="locateBtn">Encontrar cercano</button>
-      <button class="btn ghost" id="listAllBtn">Mostrar todos</button>
-    </div>
-  </header>
+    <button class="header-btn" id="locateBtn">📍 Cercano</button>
+    <button class="header-btn ghost" id="listAllBtn">Mostrar todos</button>
+  </div>
+
+</header>
+
+
 
   <main>
     <section>
